@@ -1,7 +1,7 @@
 Ampera Racing - AMP-223 PAINEL
-Analista Responsável - Tomas Carrasco Ferrarezi
-Head - Felipe Augusto Santos Bertella 
-Diretor - Tiago Giovenardi
+Analista Responsável - Guilherme Lettmann Penha
+Head - Tomas Carrasco Ferrarezi 
+Diretor - Marina Grisotti
 Projetista - Lucas Paiva
 */
 
@@ -15,17 +15,6 @@ Projetista - Lucas Paiva
 #include "driver/uart.h"
 #include "driver/can.h"
 #include "EasyNextionLibrary.h" //Library do Display
-
-
-//Configuração encoder rotativo
-#define ROTARY_PINA 26
-#define ROTARY_PINB 27
-#define ROTARY_PINSW 32
-#define MAX_GLITCH_DURATION_US 1
-portMUX_TYPE gpioMux = portMUX_INITIALIZER_UNLOCKED;
-uint8_t state=0;
-long int rotValue = 0; 
-int rot_value = 0; // tirar isso
 
 //Configuração chave seletora
 #define SELECTOR_PIN_1 GPIO_NUM_23
@@ -221,42 +210,11 @@ void Task3code (void * pvParameters)
     //Envia a mensagem
     can_message_t message2;
     message2.identifier = 0x010;         // CAN message identifier
-    message2.data_length_code = 3;       // CAN message data length - 3 bytes
-    message2.data[0] = (rot_value);
-    message2.data[1] = (botao << 7);
+    message2.data_length_code = 1;       // CAN message data length - 1 byte
+    message2.data[0] = (botao | SelectorPosition << 5); // mudei isso aqui
     can_transmit(&message2, pdMS_TO_TICKS(10));
     vTaskDelay(1 / portTICK_PERIOD_MS);   //pensar em um modo de nao mandar o rtd constantemente
 }
-}
-
-//Interrupção responsável pelo encoder rotativo
-void IRAM_ATTR isrAB() {
-   uint8_t s = state & 3;
-  portENTER_CRITICAL_ISR(&gpioMux);
-  if (CurrentForm == 1){
-    if (digitalRead(ROTARY_PINA)) s |= 4;
-    if (digitalRead(ROTARY_PINB)) s |= 8;
-    switch (s) {
-      case 0: case 5: case 10: case 15:
-        break;
-      case 1: case 7: case 8: case 14:
-      if (rotValue <= 100)
-        rotValue++; break;
-      case 2: case 4: case 11: case 13:
-        if (rotValue >= 0)
-          rotValue--; break;
-      case 3: case 12:
-        rotValue += 1; break;
-      default:
-        rotValue -= 1; break;
-    }
-    state = (s >> 2);
-   if (rotValue == -1)
-      rotValue = 0;
-   if (rotValue == 101)
-      rotValue = 100; 
-  rot_value = rotValue; }
-  portEXIT_CRITICAL_ISR(&gpioMux);
 }
 
 //Interrupção responsável pela mudança da chave seletora
@@ -326,14 +284,8 @@ void setup(){
   pinMode (SELECTOR_PIN_4, INPUT_PULLUP); 
   pinMode (SELECTOR_PIN_5, INPUT_PULLUP);
   pinMode (REGEN_PIN, INPUT_PULLDOWN);
-  pinMode (ROTARY_PINA, INPUT_PULLUP);
-  pinMode (ROTARY_PINB, INPUT_PULLUP);
-  pinMode (ROTARY_PINSW, INPUT_PULLUP); // tirar rotary_pin
   
-
   //Declaração das interrupções
-  attachInterrupt(ROTARY_PINA, isrAB, CHANGE);
-  attachInterrupt(ROTARY_PINB, isrAB, CHANGE);
   attachInterrupt(SELECTOR_PIN_1, selector_change, CHANGE);
   attachInterrupt(SELECTOR_PIN_2, selector_change, CHANGE);
   attachInterrupt(SELECTOR_PIN_3, selector_change, CHANGE);

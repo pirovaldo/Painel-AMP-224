@@ -1,4 +1,4 @@
-Ampera Racing - AMP-223 PAINEL
+Ampera Racing - AMP-224 PAINEL
 Analista Responsável - Guilherme Lettmann Penha
 Head - Tomas Carrasco Ferrarezi 
 Diretor - Marina Grisotti
@@ -19,10 +19,15 @@ Projetista - Lucas Paiva
 //Configuração chave seletora
 #define SELECTOR_PIN_1 GPIO_NUM_23
 #define SELECTOR_PIN_2 GPIO_NUM_22
-#define SELECTOR_PIN_3 GPIO_NUM_21
-#define SELECTOR_PIN_4 GPIO_NUM_19
-#define SELECTOR_PIN_5 GPIO_NUM_18
-portMUX_TYPE selectorMux = portMUX_INITIALIZER_UNLOCKED; 
+#define SELECTOR_PIN_3 GPIO_NUM_19
+#define SELECTOR_PIN_4 GPIO_NUM_21
+#define SELECTOR_PIN_5 GPIO_NUM_18 // mudei os pinos
+portMUX_TYPE selectorMux = portMUX_INITIALIZER_UNLOCKED;
+
+//Configuracao pinos Falha Driverless
+#define FALHA_DL_1 GPIO_NUM_5
+#define FALHA_DL_2 GPIO_NUM_4
+
 
 //Declaração das variáveis
 uint16_t power = 0, botao = 0, SelectorPosition = 0, lastPosition = 0, accumulatorTemp, apps = 0, RTD, REGEN = 0, GPS, motorTemp, lowVoltage, StateofCharge, fault_bms, fault_inv, fault_ecu, inversorVoltage, RPM;
@@ -134,14 +139,7 @@ void Task2code( void * pvParameters )
       time_now += period;
       switch (CurrentForm) // Varia com a página atual do display
       {
-        case 1: //Diferencial
-          //pegar número do encoder, fazer um map para 0-180, enviar para o z0
-          //diferentialValue = 90;
-          Serial.print(rot_value);
-          diferentialValue = map(rot_value, 0, 100, 0, 180);
-          myNex.writeNum("z0.val",diferentialValue); // apagar case encoder, nao sera mais utilizado
-        break;
-        case 2: //Testes
+        case 1: //Testes
           myNex.writeNum("n0.val", highVoltage); //Tensão
           myNex.writeNum("n1.val", inversorVoltage); //Tensão Inversão
           myNex.writeNum("n2.val", accumulatorCurrent); //Corrente Acumulador
@@ -152,16 +150,16 @@ void Task2code( void * pvParameters )
           myNex.writeNum("n7.val", fault_inv); //Erro Inversor
           myNex.writeNum("n8.val", fault_ecu); //Erro ECU
         break;
-        case 3: //provas curtas
+        case 2: //provas curtas
           myNex.writeNum("n0.val", speed); //Velocidade
           myNex.writeNum("n1.val", power); //Potência dos motores
         break;
-        case 4: //Endurance
+        case 3: //Endurance
           myNex.writeNum("n0.val", speed); //Velocidade
           //myNex.writeNum("n1.val", 30); //Temp. freio
           myNex.writeNum("n2.val", StateofCharge); //Baterias (%)
         default:
-        break; 
+        break; // tirei o do encoder
       }
     }
     vTaskDelay(20 / portTICK_PERIOD_MS);

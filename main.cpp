@@ -16,9 +16,12 @@ void loop() {
   digitalRead(BUTTON);
   if (digitalRead(BUTTON)==HIGH) {
       RTD = HIGH;
+    Serial.println("RTD Apertado");
     }
   else { RTD = LOW;
+        Serial.println("RTD Solto");
     }
+  
 
 
 }

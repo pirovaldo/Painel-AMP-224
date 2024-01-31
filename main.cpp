@@ -1,25 +1,27 @@
 #include <Arduino.h>
-#include <EasyNextionLibrary.h>
+#include "driver/gpio.h"
 
-EasyNex myNex(Serial2); 
-uint32_t number = 0;
-uint32_t lastnumber = 0;
-#define LOOP_TIME 2000
-unsigned long timer ;
+// put function declarations here:
+#define BUTTON GPIO_NUM_15
+bool RTD = false;
 
-void setup(){
-  myNex.begin(115200); 
-  delay(500);        
-  timer = millis();
+void setup() {
+  // put your setup code here, to run once:
+   pinMode (BUTTON, INPUT_PULLDOWN);
+   Serial.begin(115200);
 }
 
-void loop(){
+void loop() {
+  // put your main code here, to run repeatedly:
+  digitalRead(BUTTON);
+  if (digitalRead(BUTTON)==HIGH) {
+      RTD = HIGH;
+    Serial.println("RTD Apertado");
+    }
+  else { RTD = LOW;
+        Serial.println("RTD Solto");
+    }
+  
 
-  if((millis() - timer) > LOOP_TIME){
-    number = myNex.readNumber("n0.val");
-    lastnumber = number;   
-    myNex.writeNum("n1.val", number);       
-    timer = millis();
-               
-  }
+
 }

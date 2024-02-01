@@ -8,7 +8,8 @@ uint32_t lastnumber = 0;
 unsigned long timer ;
 
 void setup(){
-  myNex.begin(115200); 
+  Serial2.begin(115200, SERIAL_8N1, 25, 33); //Início do serial do display
+  myNex.begin(115200);
   delay(500);        
   timer = millis();
 }

@@ -1,9 +1,9 @@
-Ampera Racing - AMP-224 PAINEL
-Analista Responsável - Guilherme Lettmann Penha
-Head - Tomas Carrasco Ferrarezi 
-Diretor - Marina Grisotti
-Projetista - Lucas Paiva
-*/
+//Ampera Racing - AMP-224 PAINEL
+//Analista Responsável - Guilherme Lettmann Penha
+//Head - Tomas Carrasco Ferrarezi 
+//Diretor - Marina Grisotti
+//Projetista - Lucas Paiva
+
 
 #include <Arduino.h>
 #include <stdlib.h>
@@ -30,7 +30,7 @@ portMUX_TYPE selectorMux = portMUX_INITIALIZER_UNLOCKED;
 
 
 //Declaração das variáveis
-uint16_t power = 0, botao = 0, SelectorPosition = 0, lastPosition = 0, accumulatorTemp, apps = 0, RTD, REGEN = 0, GPS, motorTemp, lowVoltage, StateofCharge, fault_bms, fault_inv, fault_ecu, inversorVoltage, RPM;
+uint16_t power = 0, SelectorPosition = 0, lastPosition = 0, accumulatorTemp, apps = 0, RTD, REGEN = 0, GPS, motorTemp, lowVoltage, StateofCharge, fault_bms, fault_inv, fault_ecu, inversorVoltage, RPM;
 float speed = 0, highVoltage; // revisao das variaveis a serem mostradas
 long double accumulatorCurrent;
 int diferentialValue = 0; //valor do potenciometro do diferencial
@@ -38,7 +38,7 @@ int CurrentForm = 0; // variavel para controle da página atual
 int period = 100; // tempo entre envio de dados para o display
 unsigned long time_now = 0; // variavel para controle de envio de dados para o display
 bool display_lock = false; // false: pode mudar a página, true: nao pode mudar a página
-
+bool botao = false; // rtd eh inicialmente low
 #define REGEN_PIN GPIO_NUM_15
 portMUX_TYPE REGENbutton = portMUX_INITIALIZER_UNLOCKED;
 
@@ -96,37 +96,42 @@ void Task1code( void * pvParameters ) //task do seletor
       {
         myNex.writeStr("page page1");
         CurrentForm = 1;
-        //Serial.print("page1");
+        Serial.print("page1");
       }
       if (SelectorPosition != CurrentForm && SelectorPosition == 2)
       {
         myNex.writeStr("page page2");
         CurrentForm = 2;
-       // Serial.print("page2");
+        Serial.print("page2");
       }
       if (SelectorPosition != CurrentForm && SelectorPosition == 3)
       {
         myNex.writeStr("page page3");
         CurrentForm = 3;
-        //Serial.print("page3");
+        Serial.print("page3");
       }
       if (SelectorPosition != CurrentForm && SelectorPosition == 4)
       {
         myNex.writeStr("page page4");
         CurrentForm = 4;
-        //Serial.print("page4");
+        Serial.print("page4");
       }
       display_lock = true;
     }
-  }
+  
   //Acionamento do botão REGEN no volante
   if (digitalRead(REGEN_PIN)==HIGH) {
-      REGEN = 1;
+      botao = HIGH;
+      Serial.println("RTD");
     }
-  else REGEN = 0; 
+  else { botao = LOW;
+        Serial.println("F");
+  }
   
   vTaskDelay(30 / portTICK_PERIOD_MS);
+  }
 }
+
 
 void Task2code( void * pvParameters )
 {

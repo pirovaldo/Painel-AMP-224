@@ -147,6 +147,7 @@ void Task2code( void * pvParameters )
           sec = myNex.readNumber("n5.val");
         break;
         case 1: //TESTE RTC
+          vTaskDelay(20 / portTICK_PERIOD_MS);
           month = myNex.readNumber("n1.val");
           day = myNex.readNumber("n0.val");
           hour = myNex.readNumber("n3.val");
@@ -154,6 +155,12 @@ void Task2code( void * pvParameters )
           sec = myNex.readNumber("n5.val");
         break;
         case 2: //Testes
+          vTaskDelay(20 / portTICK_PERIOD_MS);
+          month = myNex.readNumber("n10.val");
+          day = myNex.readNumber("n9.val");
+          hour = myNex.readNumber("n12.val");
+          minute = myNex.readNumber("n13.val");
+          sec = myNex.readNumber("n14.val");
           myNex.writeNum("n0.val", highVoltage); //Tensão
           myNex.writeNum("n1.val", inversorVoltage); //Tensão Inversão
           myNex.writeNum("n2.val", accumulatorCurrent); //Corrente Acumulador
@@ -163,30 +170,27 @@ void Task2code( void * pvParameters )
           myNex.writeNum("n6.val", fault_bms); //Erro BMS
           myNex.writeNum("n7.val", fault_inv); //Erro Inversor
           myNex.writeNum("n8.val", fault_ecu); //Erro ECU
-          month = myNex.readNumber("n10.val");
-          day = myNex.readNumber("n9.val");
-          hour = myNex.readNumber("n12.val");
-          minute = myNex.readNumber("n13.val");
-          sec = myNex.readNumber("n14.val");
         break;
         case 3: //provas curtas
-          myNex.writeNum("n0.val", speed); //Velocidade
-          myNex.writeNum("n1.val", power); //Potência dos motores
+          vTaskDelay(20 / portTICK_PERIOD_MS);
           month = myNex.readNumber("n4.val");
           day = myNex.readNumber("n3.val");
           hour = myNex.readNumber("n6.val");
           minute = myNex.readNumber("n7.val");
           sec = myNex.readNumber("n8.val");
+          myNex.writeNum("n0.val", speed); //Velocidade
+          myNex.writeNum("n1.val", power); //Potência dos motores
         break;
         case 4: //Endurance
+          vTaskDelay(20 / portTICK_PERIOD_MS);
+          month = myNex.readNumber("n4.val");
+          day = myNex.readNumber("n3.val");
+          hour = myNex.readNumber("n6.val");
+          minute = myNex.readNumber("n7.val");
+          sec = myNex.readNumber("n8.val");
           myNex.writeNum("n0.val", speed); //Velocidade
           //myNex.writeNum("n1.val", 30); //Temp. freio
           myNex.writeNum("n2.val", StateofCharge); //Baterias (%)
-          month = myNex.readNumber("n4.val");
-          day = myNex.readNumber("n3.val");
-          hour = myNex.readNumber("n6.val");
-          minute = myNex.readNumber("n7.val");
-          sec = myNex.readNumber("n8.val");
         default:
         break; 
       }

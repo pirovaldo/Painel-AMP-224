@@ -45,6 +45,13 @@ portMUX_TYPE REGENbutton = portMUX_INITIALIZER_UNLOCKED;
 #define CAN_TX_PIN GPIO_NUM_17
 #define CAN_RX_PIN GPIO_NUM_16
 
+//Declaracao RTC
+uint8_t month = 0;
+uint8_t day = 0;
+uint8_t hour = 0;
+uint8_t minute = 0;
+uint8_t sec = 0;
+
 EasyNex myNex(Serial2); //definir o Serial2 como serial do display
 
 //Declaração das tarefas
@@ -59,7 +66,7 @@ void setupCan(){
   can_filter_config_t f_config;
   f_config.acceptance_code = (0x7FF << 21);
   f_config.acceptance_mask = ~(0x020 << 21);
-  f_config.single_filter = true;
+  f_config.single_filter = true//nao recebe tudo da ECU
 
   
   if(can_driver_install(&g_config, &t_config, &f_config) == ESP_OK){
@@ -125,7 +132,7 @@ void Task1code( void * pvParameters ) //task do seletor
       Serial.println("RTD");
     }
   else { botao = LOW;
-        Serial.println("F");
+      Serial.println("F");
   }
   
   vTaskDelay(30 / portTICK_PERIOD_MS);
@@ -144,7 +151,28 @@ void Task2code( void * pvParameters )
       time_now += period;
       switch (CurrentForm) // Varia com a página atual do display
       {
-        case 1: //Testes
+         case 0:
+          month = myNex.readNumber("n1.val");
+          day = myNex.readNumber("n0.val");
+          hour = myNex.readNumber("n3.val");
+          minute = myNex.readNumber("n4.val");
+          sec = myNex.readNumber("n5.val");
+        break;
+        case 1: //TESTE RTC
+          vTaskDelay(20 / portTICK_PERIOD_MS);
+          month = myNex.readNumber("n1.val");
+          day = myNex.readNumber("n0.val");
+          hour = myNex.readNumber("n3.val");
+          minute = myNex.readNumber("n4.val");
+          sec = myNex.readNumber("n5.val");
+        break;
+        case 2: //Testes
+          vTaskDelay(20 / portTICK_PERIOD_MS);
+          month = myNex.readNumber("n10.val");
+          day = myNex.readNumber("n9.val");
+          hour = myNex.readNumber("n12.val");
+          minute = myNex.readNumber("n13.val");
+          sec = myNex.readNumber("n14.val");
           myNex.writeNum("n0.val", highVoltage); //Tensão
           myNex.writeNum("n1.val", inversorVoltage); //Tensão Inversão
           myNex.writeNum("n2.val", accumulatorCurrent); //Corrente Acumulador
@@ -155,16 +183,28 @@ void Task2code( void * pvParameters )
           myNex.writeNum("n7.val", fault_inv); //Erro Inversor
           myNex.writeNum("n8.val", fault_ecu); //Erro ECU
         break;
-        case 2: //provas curtas
+        case 3: //provas curtas
+          vTaskDelay(20 / portTICK_PERIOD_MS);
+          month = myNex.readNumber("n4.val");
+          day = myNex.readNumber("n3.val");
+          hour = myNex.readNumber("n6.val");
+          minute = myNex.readNumber("n7.val");
+          sec = myNex.readNumber("n8.val");
           myNex.writeNum("n0.val", speed); //Velocidade
           myNex.writeNum("n1.val", power); //Potência dos motores
         break;
-        case 3: //Endurance
+        case 4: //Endurance
+          vTaskDelay(20 / portTICK_PERIOD_MS);
+          month = myNex.readNumber("n4.val");
+          day = myNex.readNumber("n3.val");
+          hour = myNex.readNumber("n6.val");
+          minute = myNex.readNumber("n7.val");
+          sec = myNex.readNumber("n8.val");
           myNex.writeNum("n0.val", speed); //Velocidade
           //myNex.writeNum("n1.val", 30); //Temp. freio
           myNex.writeNum("n2.val", StateofCharge); //Baterias (%)
         default:
-        break; // tirei o do encoder
+        break; // tirei o do encoder, add RTC
       }
     }
     vTaskDelay(20 / portTICK_PERIOD_MS);
@@ -205,6 +245,9 @@ void Task3code (void * pvParameters)
       break;
     case 0x0C0:
       fault_ecu = (message1.data[3] << (8) | message1.data[2]);
+    case IDDLESS:
+       fault_dl1
+       fault_dl2    
     default:
       break;}
     
